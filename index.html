@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ 拳击对决 · 模块化重构</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- ====== 1. 主界面 ====== -->
+  <div class="overlay-screen" id="startScreen">
+    <div class="start-title"><span>拳</span><span>击</span><span>对</span><span>决</span></div>
+    <button class="start-btn" id="startBtn">开 始 游 戏</button>
+    <button class="intro-btn" id="introBtn">游 戏 简 介</button>
+    <div style="color:#5a6d88; font-size:12px; letter-spacing:2px; margin-top:40px; text-align:center;">
+      PIXEL FIGHTER · 像素格斗
+    </div>
+  </div>
+
+  <!-- ====== 2. 模式选择界面 ====== -->
+  <div class="overlay-screen hidden" id="modeScreen">
+    <div class="select-panel">
+      <h2>⚔️ 选择模式</h2>
+      <p>请选择你的战斗模式</p>
+      <div class="mode-card" data-mode="pve">
+        <div class="mode-name">🤖 人机对战</div>
+        <div class="mode-desc">与AI对战，可选择11档难度（含BOSS）</div>
+        <div class="mode-arrow">›</div>
+      </div>
+      <div class="mode-card" data-mode="pvp">
+        <div class="mode-name">👥 多人对战</div>
+        <div class="mode-desc">双人同屏对战，与朋友一决高下</div>
+        <div class="mode-arrow">›</div>
+      </div>
+      <div class="mode-card" data-mode="training">
+        <div class="mode-name">🥊 训练模式</div>
+        <div class="mode-desc">练习连招，木桩可自由拖动</div>
+        <div class="mode-arrow">›</div>
+      </div>
+      <button class="back-select-btn" id="backFromMode">‹ 返回主界面</button>
+    </div>
+  </div>
+
+  <!-- ====== 3. 难度选择界面（仅人机模式） ====== -->
+  <div class="overlay-screen hidden" id="difficultyScreen">
+    <div class="select-panel">
+      <h2>💀 选择难度</h2>
+      <p>拖动滑块选择AI强度（11档为BOSS）</p>
+      <div class="slider-panel">
+        <div class="slider-row">
+          <div class="diff-label">🐣 简单</div>
+          <div class="slider-container">
+            <input type="range" id="diffSlider" class="diff-range" min="1" max="11" step="1" value="5">
+            <div class="tick-marks">
+              <span></span><span></span><span></span><span></span><span></span>
+              <span></span><span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+          <div class="diff-label right">BOSS 💀</div>
+        </div>
+        <div class="slider-row" style="margin-top: 12px;">
+          <div class="diff-value-badge" id="diffValue">5</div>
+          <div class="diff-name" id="diffName">普通</div>
+        </div>
+      </div>
+      <button class="start-fight-btn" id="startFightBtn">开 始 战 斗</button>
+      <button class="back-select-btn" id="backFromDifficulty">‹ 返回模式选择</button>
+    </div>
+  </div>
+
+  <!-- ====== 4. 游戏容器 ====== -->
+  <div class="game-container hidden" id="gameContainer">
+    <div class="health-bars">
+      <div class="player-hp">
+        <div class="player-label">
+          <span id="p1NameDisplay" class="name-editable" title="点击修改名字">🔥 铁拳</span>
+          <span id="hp1-text">100</span>
+        </div>
+        <div class="hp-bar-bg"><div id="hp1-fill" class="hp-fill" style="width:100%"></div></div>
+        <div class="energy-container"><div id="energy1-fill" class="energy-fill" style="width:0%"></div></div>
+      </div>
+      <div class="center-vs">VS</div>
+      <div class="player-hp">
+        <div class="player-label">
+          <span id="p2NameDisplay" class="name-editable" title="点击修改名字">⚡ 闪电 (AI)</span>
+          <span id="hp2-text">100</span>
+        </div>
+        <div class="hp-bar-bg" id="hp2-bar-bg">
+          <div id="hp2-fill" class="hp-fill p2" style="width:100%"></div>
+        </div>
+        <div class="energy-container"><div id="energy2-fill" class="energy-fill p2" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <div class="arena">
+      <canvas id="gameCanvas" width="800" height="450"></canvas>
+    </div>
+
+    <div class="controls" id="controlsHint">
+      <div id="p1Controls"><kbd>A</kbd><kbd>D</kbd> 移动 · <kbd>W</kbd> 跳(二段) · <kbd>F</kbd> 地面拳 · <kbd>G</kbd> 下勾拳 · <kbd>S</kbd> 火球 · 空中<kbd>F</kbd> 空中拳</div>
+      <div id="p2Controls">AI 控制</div>
+    </div>
+
+    <div class="training-controls" id="trainingControls">
+      <div class="training-hint"><kbd>鼠标拖动</kbd> 木桩移动 · <kbd>双击</kbd> 木桩归位</div>
+      <div class="pin-toggle" id="pinToggle">
+        <div class="pin-track"><div class="pin-thumb"></div></div>
+        <span>固定木桩</span>
+      </div>
+    </div>
+
+    <div class="btn-group" style="margin-top:14px;">
+      <button class="reset-btn" id="backToMenuBtn" style="background:#1a2435; box-shadow:0 5px 0 #0a0d13, 0 8px 16px black; border-color:#2d3a4e;">🔙 返回主界面</button>
+    </div>
+  </div>
+
+  <!-- ====== 5. 暂停遮罩 ====== -->
+  <div class="pause-overlay" id="pauseOverlay">
+    <div class="pause-title">暂 停</div>
+    <button class="pause-btn" id="pauseResumeBtn">▶ 继续游戏</button>
+    <button class="pause-btn" id="pauseRestartBtn">🔄 重新开始</button>
+    <button class="pause-btn danger" id="pauseExitBtn">🚪 返回主菜单</button>
+  </div>
+
+  <!-- ====== 6. 游戏结束遮罩 ====== -->
+  <div class="gameover-overlay" id="gameoverOverlay">
+    <div class="gameover-title" id="gameoverTitle">🔥 铁拳 胜利!</div>
+    <div class="gameover-hint">按 <kbd>空格</kbd> 重新开始 · 按 <kbd>ESC</kbd> 返回主菜单</div>
+    <div class="gameover-buttons">
+      <button class="gameover-btn" id="gameoverRestartBtn">🔄 重新开始</button>
+      <button class="gameover-btn" id="gameoverMenuBtn">🏠 返回主菜单</button>
+    </div>
+  </div>
+
+  <!-- ====== 7. 游戏简介弹窗 ====== -->
+  <div class="intro-modal" id="introModal">
+    <div class="intro-content">
+      <h2>⚔️ 游戏简介</h2>
+      <p>这是一款<strong>像素风格的双人格斗游戏</strong>，支持人机对战、同屏对战和训练模式。</p>
+      <p><strong>操作方式：</strong><br>
+      🔥 玩家1（红方）：<strong>A / D</strong> 移动，<strong>W</strong> 跳跃（可二段跳），<strong>F</strong> 地面拳，<strong>G</strong> 下勾拳，<strong>S</strong> 发射火球（空中发射自动偏下）。<br>
+      ⚡ 玩家2（蓝方）：<strong>← / →</strong> 移动，<strong>↑</strong> 跳跃，<strong>K</strong> 地面拳，<strong>J</strong> 下勾拳，<strong>↓</strong> 发射火球。</p>
+      <p><strong>核心机制：</strong><br>
+      🔹 <strong>二段跳</strong>：空中再次按跳跃键可进行二段跳。<br>
+      🔹 <strong>火球</strong>：抛物线飞行，命中造成3点伤害，并附加3秒灼烧效果（每秒3点伤害）。<br>
+      🔹 <strong>BOSS难度</strong>：将AI滑块拉到最右，BOSS拥有多阶段、霸体、回血和独特的空摘火球能力。</p>
+      <p>点击“开始游戏”按钮进入模式选择，战斗中按 <strong>ESC</strong> 可暂停。</p>
+      <button class="close-intro" id="closeIntroBtn">知道了</button>
+    </div>
+  </div>
+
+  <div class="boss-phase-toast" id="bossPhaseToast">⚡ BOSS 进入第二阶段 ⚡</div>
+
+  <script src="ai.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
